@@ -1,3 +1,5 @@
+# checkstyle: noqa
+
 import os
 import sys
 import getopt
@@ -39,7 +41,7 @@ Limitations
 '''
 
 USAGE = "USAGE: process_monitor_unix.py"\
-        "\n    [-c|--crash_bin]             File to record crash info too" \
+        "\n    -c|--crash_bin             File to record crash info too" \
         "\n    [-P|--port PORT]             TCP port to bind this agent too"\
         "\n    [-l|--log_level LEVEL]       log level (default 1), increase for more verbosity"
 
@@ -91,17 +93,19 @@ class debugger_thread:
 
 ########################################################################################################################
 
-class nix_process_monitor_pedrpc_server(pedrpc.server):
+class nix_process_monitor_pedrpc_server(pedrpc.Server):
     def __init__(self, host, port, crash_bin, log_level=1):
         '''
         @type host: String
         @param host: Hostname or IP address
         @type port: Integer
         @param port: Port to bind server to
+        @type crash_bin: String
+        @param crash_bin: Where to save monitored process crashes for analysis
         
         '''
         
-        pedrpc.server.__init__(self, host, port)
+        pedrpc.Server.__init__(self, host, port)
         self.crash_bin = crash_bin
         self.log_level = log_level
         self.dbg = None
@@ -244,12 +248,13 @@ if __name__ == "__main__":
 
     log_level = 1
     PORT = None
+    crash_bin = None
     for opt, arg in opts:
         if opt in ("-c", "--crash_bin"):   crash_bin  = arg
         if opt in ("-P", "--port"): PORT = int(arg)
         if opt in ("-l", "--log_level"):   log_level  = int(arg)
 
-    if crash_bin == None: ERR(USAGE)
+    if not crash_bin: ERR(USAGE)
     
     if PORT == None:
         PORT = 26002
